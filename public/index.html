@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>RISK MODE</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div id="app">
+    <section id="pageHome" class="page active">
+      <header class="topbar homebar">
+        <div class="brand">
+          <img class="logoImg" src="/assets/icons/rm-logo.svg" alt="RM" />
+          <div class="brandWordmark">RISK MODE</div>
+        </div>
+
+        <div class="langHost">
+          <button class="langBtn" id="homeLangBtn" type="button">
+            <img id="homeLangFlag" class="langFlag" src="/flags/ru.svg" alt="RU" />
+            <span id="homeLangLabel">RU</span>
+            <span class="chev">▾</span>
+          </button>
+          <div class="langMenu" id="homeLangMenu" hidden></div>
+        </div>
+      </header>
+
+      <main class="homeMain">
+        <div class="cardsGrid">
+          <button class="gameCard activeGame" data-page="mines" type="button">
+            <div class="gamePosterWrap">
+              <img class="gamePoster" src="/assets/games/mines.png" alt="Mines" />
+            </div>
+            <div class="gameName">MINES</div>
+          </button>
+
+          <div class="gameCard soonGame" aria-disabled="true">
+            <div class="soonRibbon ribbonA"></div>
+            <div class="soonRibbon ribbonB"></div>
+            <div class="gamePosterWrap">
+              <img class="gamePoster" src="/assets/games/luckyjet.png" alt="Lucky Jet" />
+            </div>
+            <div class="soonCenter">SOON</div>
+            <div class="gameName">LUCKY JET</div>
+          </div>
+
+          <div class="gameCard soonGame" aria-disabled="true">
+            <div class="soonRibbon ribbonA"></div>
+            <div class="soonRibbon ribbonB"></div>
+            <div class="gamePosterWrap">
+              <img class="gamePoster" src="/assets/games/aviamasters.png" alt="Avia Masters" />
+            </div>
+            <div class="soonCenter">SOON</div>
+            <div class="gameName">AVIA MASTERS</div>
+          </div>
+
+          <div class="gameCard soonGame" aria-disabled="true">
+            <div class="soonRibbon ribbonA"></div>
+            <div class="soonRibbon ribbonB"></div>
+            <div class="gamePosterWrap">
+              <img class="gamePoster" src="/assets/games/towerrush.png" alt="Tower Crush" />
+            </div>
+            <div class="soonCenter">SOON</div>
+            <div class="gameName">TOWER CRUSH</div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footerMark">2026 © RISK MODE</footer>
+    </section>
+
+    <section id="pageMines" class="page">
+      <header class="topbar gamebar">
+        <div class="gameBrand">
+          <img class="logoImg smallLogo" src="/assets/icons/rm-logo.svg" alt="RM" />
+          <div class="gameBrandText">MINES</div>
+        </div>
+
+        <div class="gameActions">
+          <div class="langHost inlineHost">
+            <button class="langBtn compact" id="minesLangBtn" type="button">
+              <img id="minesLangFlag" class="langFlag" src="/flags/ru.svg" alt="RU" />
+              <span id="minesLangLabel">RU</span>
+              <span class="chev">▾</span>
+            </button>
+            <div class="langMenu" id="minesLangMenu" hidden></div>
+          </div>
+          <button id="btnHistoryHead" class="ghostBtn" type="button">History</button>
+        </div>
+      </header>
+
+      <main class="gameMain">
+        <div class="controlBlock">
+          <div class="controlLabel" id="minesLabel">Mines</div>
+          <div id="minesSlider" class="segSlider seg4">
+            <div class="segThumb"></div>
+            <button class="segSlideBtn active" type="button" data-mines="1">1</button>
+            <button class="segSlideBtn" type="button" data-mines="3">3</button>
+            <button class="segSlideBtn" type="button" data-mines="5">5</button>
+            <button class="segSlideBtn" type="button" data-mines="7">7</button>
+          </div>
+        </div>
+
+        <div class="controlBlock">
+          <div class="controlLabel" id="modeLabel">Mode</div>
+          <div id="modeSlider" class="segSlider seg2">
+            <div class="segThumb"></div>
+            <button class="segSlideBtn active" type="button" data-mode="single">Single</button>
+            <button class="segSlideBtn" type="button" data-mode="all">All</button>
+          </div>
+        </div>
+
+        <div class="boardShell">
+          <div class="boardFrame">
+            <div id="board" class="board"></div>
+          </div>
+        </div>
+
+        <button id="btnPlay" class="playBtn" type="button">Play</button>
+      </main>
+
+      <footer class="gameFooter">
+        <button id="backFromMines" class="ghostBtn backBtn" type="button">Back</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="historyOverlay" class="modalOverlay" hidden>
+    <div class="historyModal">
+      <button id="btnCloseHistory" class="closeBtn" type="button">×</button>
+      <div class="historyHeader">
+        <div class="historyTitles">
+          <div id="historyTitle" class="historyTitle">History</div>
+          <div id="historyMeta" class="historyMeta"></div>
+        </div>
+        <div id="latestBadge" class="latestBadge">LATEST</div>
+      </div>
+
+      <div class="historyStage">
+        <div id="historyPreviewBoard" class="historyPreviewBoard"></div>
+      </div>
+
+      <div class="historyNav">
+        <button id="historyPrev" class="navBtn" type="button">← Prev</button>
+        <div id="historyCounter" class="historyCounter">1 / 1</div>
+        <button id="historyNext" class="navBtn" type="button">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>
