@@ -32,8 +32,8 @@ const L = {
   ru: {
     languageName: "Русский",
     menuTitle: "<b>ГЛАВНОЕ МЕНЮ</b>",
-    menuText: "Премиальный доступ к сигналам для игр 1WIN.
-Сейчас в приложении доступна игра <b>MINES</b>.",
+    menuText: `Премиальный доступ к сигналам для игр 1WIN.
+Сейчас в приложении доступна игра <b>MINES</b>.`,
     instructionBtn: "📘 Инструкция",
     languageBtn: "🌐 Выбрать язык",
     supportBtn: "🔗 Поддержка",
@@ -43,7 +43,7 @@ const L = {
     registerBtn: "✅ Регистрация",
     depositBtn: "💳 Пополнить счёт",
     instructionTitle: "<b>ИНСТРУКЦИЯ</b>",
-    instructionBody: "🤖 <b>БОТ RISK MODE РАБОТАЕТ НА БАЗЕ AI-АЛГОРИТМОВ, АНАЛИЗА ИГРОВЫХ СЦЕНАРИЕВ И МОДЕЛЕЙ ПОВЕДЕНИЯ В ЭКОСИСТЕМЕ 1WIN.</b>
+    instructionBody: `🤖 <b>БОТ RISK MODE РАБОТАЕТ НА БАЗЕ AI-АЛГОРИТМОВ, АНАЛИЗА ИГРОВЫХ СЦЕНАРИЕВ И МОДЕЛЕЙ ПОВЕДЕНИЯ В ЭКОСИСТЕМЕ 1WIN.</b>
 
 ⚜️ <b>В ОСНОВЕ СИСТЕМЫ — БОЛЬШОЙ МАССИВ ИГРОВЫХ ПАТТЕРНОВ, СЦЕНАРИЕВ И РАБОЧИХ МОДЕЛЕЙ ДЛЯ MINES.</b>
 
@@ -64,7 +64,7 @@ const L = {
 
 🟢 6. Для более стабильной работы по сигналам придерживайся <b>ОДНОЙ СТРАТЕГИИ</b> и соблюдай последовательность входов.
 
-📩 По вопросам стратегии и оптимального подхода обращайтесь в <b>ПОДДЕРЖКУ</b>.",
+📩 По вопросам стратегии и оптимального подхода обращайтесь в <b>ПОДДЕРЖКУ</b>.`,
     chooseLanguageTitle: "<b>ВЫБЕРИТЕ ЯЗЫК</b>",
     supportMissing: "Поддержка пока не настроена.",
     registrationTitle: "<b>ШАГ 1 ИЗ 2</b>",
@@ -77,8 +77,8 @@ const L = {
 
 После подтверждения депозита доступ к сигналам откроется <b>АВТОМАТИЧЕСКИ</b>.`,
     accessTitle: "<b>ДОСТУП АКТИВЕН</b>",
-    accessText: "Ваш аккаунт <b>ПОДТВЕРЖДЁН</b>.
-Откройте приложение и получите сигнал для <b>MINES</b>.",
+    accessText: `Ваш аккаунт <b>ПОДТВЕРЖДЁН</b>.
+Откройте приложение и получите сигнал для <b>MINES</b>.`,
     langSaved: "Язык сохранён."
   },
   en: {
@@ -110,9 +110,9 @@ const L = {
   pt: { languageName: "Português", menuTitle: "<b>RISK MODE</b>\nMenu principal", menuText: "Escolha uma ação abaixo.", instructionBtn: "📘 Instruções", languageBtn: "🌐 Escolher idioma", supportBtn: "🔗 Suporte", getSignalBtn: "⚜️ Obter sinal", backBtn: "⬅️ Voltar ao menu", openAppBtn: "🎮 Abrir RISK MODE", registerBtn: "✅ Registrar", depositBtn: "💳 Depositar", instructionTitle: "<b>INSTRUÇÕES</b>", instructionBody: "1. Registre-se usando o botão abaixo.\n2. Depois do registro, faça o depósito mínimo.\n3. Quando o acesso for confirmado, toque em “Obter sinal”.\n4. Abra o aplicativo e use os sinais dentro do WebApp.", chooseLanguageTitle: "<b>Escolha o idioma</b>", supportMissing: "O suporte ainda não foi configurado.", registrationTitle: "<b>Passo 1 de 2</b>", registrationText: "Para desbloquear os sinais, registre-se primeiro.", depositTitle: "<b>Passo 2 de 2</b>", depositText: (amount) => `Registro confirmado. Agora faça um depósito a partir de <b>${amount}</b> para liberar o acesso.`, accessTitle: "<b>Acesso liberado</b>", accessText: "Toque no botão abaixo para abrir o app.", langSaved: "Idioma salvo." },
   "pt-br": { languageName: "Português (BR)", menuTitle: "<b>RISK MODE</b>\nMenu principal", menuText: "Escolha uma ação abaixo.", instructionBtn: "📘 Instruções", languageBtn: "🌐 Escolher idioma", supportBtn: "🔗 Suporte", getSignalBtn: "⚜️ Obter sinal", backBtn: "⬅️ Voltar ao menu", openAppBtn: "🎮 Abrir RISK MODE", registerBtn: "✅ Registrar", depositBtn: "💳 Depositar", instructionTitle: "<b>INSTRUÇÕES</b>", instructionBody: "1. Faça o cadastro pelo botão abaixo.\n2. Depois do cadastro, faça o depósito mínimo.\n3. Quando o acesso for confirmado, toque em “Obter sinal”.\n4. Abra o app e use os sinais dentro do WebApp.", chooseLanguageTitle: "<b>Escolha o idioma</b>", supportMissing: "O suporte ainda não foi configurado.", registrationTitle: "<b>Etapa 1 de 2</b>", registrationText: "Para liberar os sinais, faça o cadastro primeiro.", depositTitle: "<b>Etapa 2 de 2</b>", depositText: (amount) => `Cadastro confirmado. Agora faça um depósito de pelo menos <b>${amount}</b> para liberar o acesso.`, accessTitle: "<b>Acesso liberado</b>", accessText: "Toque no botão abaixo para abrir o app.", langSaved: "Idioma salvo." },
   ar: { languageName: "Español (AR)", menuTitle: "<b>RISK MODE</b>\nMenú principal", menuText: "Elegí una acción abajo.", instructionBtn: "📘 Instrucciones", languageBtn: "🌐 Elegir idioma", supportBtn: "🔗 Soporte", getSignalBtn: "⚜️ Obtener señal", backBtn: "⬅️ Volver al menú", openAppBtn: "🎮 Abrir RISK MODE", registerBtn: "✅ Registrarse", depositBtn: "💳 Depositar", instructionTitle: "<b>INSTRUCCIONES</b>", instructionBody: "1. Registrate con el botón de abajo.\n2. Después del registro, hacé el depósito mínimo.\n3. Cuando el acceso esté confirmado, tocá “Obtener señal”.\n4. Abrí la app y usá las señales dentro del WebApp.", chooseLanguageTitle: "<b>Seleccioná idioma</b>", supportMissing: "El soporte todavía no está configurado.", registrationTitle: "<b>Paso 1 de 2</b>", registrationText: "Para desbloquear las señales, primero registrate.", depositTitle: "<b>Paso 2 de 2</b>", depositText: (amount) => `Registro confirmado. Ahora hacé un depósito desde <b>${amount}</b> para abrir el acceso.`, accessTitle: "<b>Acceso abierto</b>", accessText: "Tocá el botón de abajo para abrir la app.", langSaved: "Idioma guardado." },
-  sa: { languageName: "العربية", menuTitle: "<b>RISK MODE</b>\nالقائمة الرئيسية", menuText: "اختر إجراءً من الأسفل.", instructionBtn: "📘 التعليمات", languageBtn: "🌐 اختيار اللغة", supportBtn: "🔗 الدعم", getSignalBtn: "⚜️ احصل على الإشارة", backBtn: "⬅️ العودة إلى القائمة", openAppBtn: "🎮 فتح RISK MODE", registerBtn: "✅ التسجيل", depositBtn: "💳 الإيداع", instructionTitle: "<b>التعليمات</b>", instructionBody: "1. سجّل باستخدام الزر أدناه.\n2. بعد التسجيل قم بالإيداع الأدنى.\n3. بعد تأكيد الوصول اضغط «احصل على الإشارة».\n4. افتح التطبيق واستخدم الإشارات داخل WebApp.", chooseLanguageTitle: "<b>اختر اللغة</b>", supportMissing: "الدعم غير مهيأ بعد.", registrationTitle: "<b>الخطوة 1 من 2</b>", registrationText: "لفتح الإشارات، قم بالتسجيل أولاً باستخدام الزر أدناه.", depositTitle: "<b>الخطوة 2 من 2</b>", depositText: (amount) => `تم تأكيد التسجيل. الآن قم بالإيداع من <b>${amount}</b> لفتح الوصول.`, accessTitle: "<b>تم فتح الوصول</b>", accessText: "اضغط الزر أدناه لفتح التطبيق.", langSaved: "تم حفظ اللغة." },
-  it: { languageName: "Italiano", menuTitle: "<b>RISK MODE</b>\nMenu principale", menuText: "Scegli un'azione qui sotto.", instructionBtn: "📘 Istruzioni", languageBtn: "🌐 Scegli lingua", supportBtn: "🔗 Supporto", getSignalBtn: "⚜️ Ottieni segnale", backBtn: "⬅️ Torna al menu", openAppBtn: "🎮 Apri RISK MODE", registerBtn: "✅ Registrati", depositBtn: "💳 Deposita", instructionTitle: "<b>ISTRUZIONI</b>", instructionBody: "1. Registrati usando il pulsante qui sotto.\n2. Dopo la registrazione effettua il deposito minimo.\n3. Quando l'accesso è confermato, premi “Ottieni segnale”.\n4. Apri l'app e usa i segnali dentro il WebApp.", chooseLanguageTitle: "<b>Scegli la lingua</b>", supportMissing: "Il supporto non è ancora configurato.", registrationTitle: "<b>Passo 1 di 2</b>", registrationText: "Per sbloccare i segnali, registrati prima.", depositTitle: "<b>Passo 2 di 2</b>", depositText: (amount) => `Registrazione confermata. Ora effettua un deposito da <b>${amount}</b> per sbloccare l'accesso.`, accessTitle: "<b>Accesso sbloccato</b>", accessText: "Premi il pulsante qui sotto per aprire l'app.", langSaved: "Lingua salvata." },
-  hi: { languageName: "हिन्दी", menuTitle: "<b>RISK MODE</b>\nमुख्य मेनू", menuText: "नीचे एक विकल्प चुनें।", instructionBtn: "📘 निर्देश", languageBtn: "🌐 भाषा चुनें", supportBtn: "🔗 सहायता", getSignalBtn: "⚜️ सिग्नल प्राप्त करें", backBtn: "⬅️ मुख्य मेनू पर वापस", openAppBtn: "🎮 RISK MODE खोलें", registerBtn: "✅ रजिस्टर करें", depositBtn: "💳 जमा करें", instructionTitle: "<b>निर्देश</b>", instructionBody: "1. नीचे दिए गए बटन से पंजीकरण करें।\n2. पंजीकरण के बाद न्यूनतम जमा करें।\n3. एक्सेस कन्फर्म होने पर “सिग्नल प्राप्त करें” दबाएँ।\n4. ऐप खोलें और WebApp के अंदर सिग्नल उपयोग करें।", chooseLanguageTitle: "<b>भाषा चुनें</b>", supportMissing: "सपोर्ट अभी सेट नहीं है।", registrationTitle: "<b>चरण 1 / 2</b>", registrationText: "सिग्नल अनलॉक करने के लिए पहले रजिस्टर करें।", depositTitle: "<b>चरण 2 / 2</b>", depositText: (amount) => `रजिस्ट्रेशन कन्फर्म हो गया है। अब एक्सेस खोलने के लिए <b>${amount}</b> या उससे अधिक जमा करें।`, accessTitle: "<b>एक्सेस खुल गया</b>", accessText: "ऐप खोलने के लिए नीचे बटन दबाएँ।", langSaved: "भाषा सेव हो गई।" },
+  sa: { languageName: "العربية", menuTitle: "<b>RISK MODE</b>\nالقائمة الرئيسية", menuText: "اختر إجراءً من الأسفل.", instructionBtn: "📘 التعليمات", languageBtn: "🌐 اختيار اللغة", supportBtn: "🔗 الدعم", getSignalBtn: "⚜️ احصل على الإشارة", backBtn: "⬅️ العودة إلى القائمة", openAppBtn: "🎮 فتح RISK MODE", registerBtn: "✅ التسجيل", depositBtn: "💳 الإيداع", instructionTitle: "<b>التعليمات</b>", instructionBody: "1. سجّل عبر الزر أدناه.\n2. بعد التسجيل قم بأقل إيداع.\n3. بعد تأكيد الوصول اضغط على “احصل على الإشارة”.\n4. افتح التطبيق واستخدم الإشارات داخل WebApp.", chooseLanguageTitle: "<b>اختر اللغة</b>", supportMissing: "الدعم غير مُعد بعد.", registrationTitle: "<b>الخطوة 1 من 2</b>", registrationText: "لفتح الإشارات، سجّل أولاً عبر الزر أدناه.", depositTitle: "<b>الخطوة 2 من 2</b>", depositText: (amount) => `تم تأكيد التسجيل. الآن قم بإيداع يبدأ من <b>${amount}</b> لفتح الوصول.`, accessTitle: "<b>تم فتح الوصول</b>", accessText: "اضغط الزر أدناه لفتح التطبيق.", langSaved: "تم حفظ اللغة." },
+  it: { languageName: "Italiano", menuTitle: "<b>RISK MODE</b>\nMenu principale", menuText: "Scegli un'azione qui sotto.", instructionBtn: "📘 Istruzioni", languageBtn: "🌐 Scegli lingua", supportBtn: "🔗 Supporto", getSignalBtn: "⚜️ Ottieni segnale", backBtn: "⬅️ Torna al menu", openAppBtn: "🎮 Apri RISK MODE", registerBtn: "✅ Registrati", depositBtn: "💳 Deposita", instructionTitle: "<b>ISTRUZIONI</b>", instructionBody: "1. Registrati usando il pulsante qui sotto.\n2. Dopo la registrazione effettua il deposito minimo.\n3. Quando l'accesso è confermato, tocca “Ottieni segnale”.\n4. Apri l'app e usa i segnali nel WebApp.", chooseLanguageTitle: "<b>Scegli la lingua</b>", supportMissing: "Il supporto non è ancora configurato.", registrationTitle: "<b>Passo 1 di 2</b>", registrationText: "Per sbloccare i segnali, registrati prima.", depositTitle: "<b>Passo 2 di 2</b>", depositText: (amount) => `Registrazione confermata. Ora effettua un deposito da <b>${amount}</b> per aprire l'accesso.`, accessTitle: "<b>Accesso attivo</b>", accessText: "Tocca il pulsante qui sotto per aprire l'app.", langSaved: "Lingua salvata." },
+  hi: { languageName: "हिन्दी", menuTitle: "<b>RISK MODE</b>\nमुख्य मेन्यू", menuText: "नीचे से एक विकल्प चुनें।", instructionBtn: "📘 निर्देश", languageBtn: "🌐 भाषा चुनें", supportBtn: "🔗 सहायता", getSignalBtn: "⚜️ सिग्नल प्राप्त करें", backBtn: "⬅️ मुख्य मेन्यू पर लौटें", openAppBtn: "🎮 RISK MODE खोलें", registerBtn: "✅ रजिस्टर करें", depositBtn: "💳 जमा करें", instructionTitle: "<b>निर्देश</b>", instructionBody: "1. नीचे दिए गए बटन से रजिस्टर करें।\n2. रजिस्ट्रेशन के बाद न्यूनतम जमा करें।\n3. एक्सेस कन्फर्म होने के बाद “सिग्नल प्राप्त करें” दबाएँ।\n4. ऐप खोलें और WebApp के अंदर सिग्नल का उपयोग करें।", chooseLanguageTitle: "<b>भाषा चुनें</b>", supportMissing: "सपोर्ट अभी सेट नहीं है।", registrationTitle: "<b>चरण 1 / 2</b>", registrationText: "सिग्नल अनलॉक करने के लिए पहले रजिस्टर करें।", depositTitle: "<b>चरण 2 / 2</b>", depositText: (amount) => `रजिस्ट्रेशन कन्फर्म हो गया है। अब एक्सेस खोलने के लिए <b>${amount}</b> या उससे अधिक जमा करें।`, accessTitle: "<b>एक्सेस खुल गया</b>", accessText: "ऐप खोलने के लिए नीचे बटन दबाएँ।", langSaved: "भाषा सेव हो गई।" },
   uk: { languageName: "Українська", menuTitle: "<b>RISK MODE</b>\nГоловне меню", menuText: "Оберіть дію нижче.", instructionBtn: "📘 Інструкція", languageBtn: "🌐 Обрати мову", supportBtn: "🔗 Підтримка", getSignalBtn: "⚜️ Отримати сигнал", backBtn: "⬅️ Повернутися в меню", openAppBtn: "🎮 Відкрити RISK MODE", registerBtn: "✅ Реєстрація", depositBtn: "💳 Поповнити", instructionTitle: "<b>ІНСТРУКЦІЯ</b>", instructionBody: "1. Зареєструйтеся кнопкою нижче.\n2. Після реєстрації внесіть мінімальний депозит.\n3. Після підтвердження доступу натисніть «Отримати сигнал».\n4. Відкрийте застосунок і використовуйте сигнали у WebApp.", chooseLanguageTitle: "<b>Оберіть мову</b>", supportMissing: "Підтримка ще не налаштована.", registrationTitle: "<b>Крок 1 з 2</b>", registrationText: "Щоб відкрити доступ до сигналів, спочатку зареєструйтеся.", depositTitle: "<b>Крок 2 з 2</b>", depositText: (amount) => `Реєстрацію підтверджено. Тепер внесіть депозит від <b>${amount}</b>, щоб відкрити доступ.`, accessTitle: "<b>Доступ відкрито</b>", accessText: "Натисніть кнопку нижче, щоб відкрити застосунок.", langSaved: "Мову збережено." },
   kz: { languageName: "Қазақша", menuTitle: "<b>RISK MODE</b>\nНегізгі мәзір", menuText: "Төменнен әрекетті таңдаңыз.", instructionBtn: "📘 Нұсқаулық", languageBtn: "🌐 Тілді таңдау", supportBtn: "🔗 Қолдау", getSignalBtn: "⚜️ Сигнал алу", backBtn: "⬅️ Мәзірге оралу", openAppBtn: "🎮 RISK MODE ашу", registerBtn: "✅ Тіркелу", depositBtn: "💳 Депозит жасау", instructionTitle: "<b>НҰСҚАУЛЫҚ</b>", instructionBody: "1. Төмендегі батырма арқылы тіркеліңіз.\n2. Тіркелгеннен кейін ең төменгі депозитті жасаңыз.\n3. Қолжетімділік расталған соң «Сигнал алу» түймесін басыңыз.\n4. Қолданбаны ашып, сигналдарды WebApp ішінде пайдаланыңыз.", chooseLanguageTitle: "<b>Тілді таңдаңыз</b>", supportMissing: "Қолдау әлі бапталмаған.", registrationTitle: "<b>1/2 қадам</b>", registrationText: "Сигналдарға қол жеткізу үшін алдымен тіркеліңіз.", depositTitle: "<b>2/2 қадам</b>", depositText: (amount) => `Тіркеу расталды. Енді қолжетімділікті ашу үшін <b>${amount}</b> бастап депозит жасаңыз.`, accessTitle: "<b>Қолжетімділік ашылды</b>", accessText: "Қолданбаны ашу үшін төмендегі батырманы басыңыз.", langSaved: "Тіл сақталды." },
   uz: { languageName: "Oʻzbek", menuTitle: "<b>RISK MODE</b>\nAsosiy menyu", menuText: "Quyidan amalni tanlang.", instructionBtn: "📘 Yoʻriqnoma", languageBtn: "🌐 Tilni tanlash", supportBtn: "🔗 Yordam", getSignalBtn: "⚜️ Signal olish", backBtn: "⬅️ Menyuga qaytish", openAppBtn: "🎮 RISK MODE ochish", registerBtn: "✅ Roʻyxatdan oʻtish", depositBtn: "💳 Depozit qilish", instructionTitle: "<b>YOʻRIQNOMA</b>", instructionBody: "1. Quyidagi tugma orqali roʻyxatdan oʻting.\n2. Roʻyxatdan oʻtgach minimal depozit kiriting.\n3. Kirish tasdiqlangandan soʻng “Signal olish”ni bosing.\n4. Ilovani ochib, signallardan WebApp ichida foydalaning.", chooseLanguageTitle: "<b>Tilni tanlang</b>", supportMissing: "Yordam hali sozlanmagan.", registrationTitle: "<b>1/2 qadam</b>", registrationText: "Signallarni ochish uchun avval roʻyxatdan oʻting.", depositTitle: "<b>2/2 qadam</b>", depositText: (amount) => `Roʻyxatdan oʻtish tasdiqlandi. Endi kirishni ochish uchun <b>${amount}</b> dan boshlab depozit qiling.`, accessTitle: "<b>Kirish ochildi</b>", accessText: "Ilovani ochish uchun quyidagi tugmani bosing.", langSaved: "Til saqlandi." },
@@ -229,9 +229,7 @@ function mainKeyboard(user, lang) {
 
 function languageKeyboard(lang) {
   const p = tr(lang);
-  const rows = LANG_ORDER.map((pair) => {
-    return pair.map((code) => ({ text: flagLabel(code), callback_data: `lang:${code}` }));
-  });
+  const rows = LANG_ORDER.map((pair) => pair.map((code) => ({ text: flagLabel(code), callback_data: `lang:${code}` })));
   rows.push([{ text: p.backBtn, callback_data: "main_menu" }]);
   return { inline_keyboard: rows };
 }
@@ -312,7 +310,9 @@ bot.on("callback_query", async (query) => {
   const lang = user.lang || "ru";
   const p = tr(lang);
 
-  try { await bot.answerCallbackQuery(query.id); } catch {}
+  try {
+    await bot.answerCallbackQuery(query.id);
+  } catch {}
 
   if (query.data === "main_menu") {
     user = await getUser(chatId);
@@ -339,20 +339,23 @@ bot.on("callback_query", async (query) => {
     const next = query.data.split(":")[1];
     user = (await patchUser(chatId, { lang: next })) || user;
     const np = tr(user.lang || next);
-    try { await bot.answerCallbackQuery(query.id, { text: np.langSaved }); } catch {}
+    try {
+      await bot.answerCallbackQuery(query.id, { text: np.langSaved });
+    } catch {}
     await editMenu(query, mainText(user.lang), mainKeyboard(user, user.lang));
     await upsertMenuMeta(chatId, query.message.message_id, user);
     return;
   }
 
   if (query.data === "support_info") {
-    try { await bot.answerCallbackQuery(query.id, { text: p.supportMissing, show_alert: true }); } catch {}
+    try {
+      await bot.answerCallbackQuery(query.id, { text: p.supportMissing, show_alert: true });
+    } catch {}
     return;
   }
 
   if (query.data === "get_signal") {
     user = await getUser(chatId);
-    const p2 = tr(user.lang || "ru");
 
     if (!user.reg) {
       await editMenu(query, registrationText(user.lang), registrationKeyboard(chatId, user.lang));
@@ -369,7 +372,6 @@ bot.on("callback_query", async (query) => {
 
     await editMenu(query, accessText(user.lang), accessKeyboard(user.lang));
     await upsertMenuMeta(chatId, query.message.message_id, user);
-    return;
   }
 });
 
