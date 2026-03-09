@@ -1,3 +1,4 @@
+
 import express from "express";
 import crypto from "crypto";
 import dotenv from "dotenv";
@@ -11,8 +12,11 @@ dotenv.config();
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const BASE_URL = (process.env.BASE_URL || "").replace(/\/$/, "");
 const ONEWIN_LINK = process.env.ONEWIN_LINK || "";
-const MIN_DEPOSIT = Number(process.env.MIN_DEPOSIT || 100);
+const MIN_DEPOSIT = process.env.MIN_DEPOSIT || "1500 RUB (20$)";
+const MIN_DEPOSIT_NUM = Number(String(process.env.MIN_DEPOSIT || "1500").match(/\d+/)?.[0] || 1500);
 const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || "change-me";
+const BOT_USERNAME = (process.env.BOT_USERNAME || "").replace(/^@/, "");
+const REF_REWARD = Number(process.env.REF_REWARD || 150);
 const PORT = Number(process.env.PORT || 3000);
 
 if (!BOT_TOKEN) console.log("⚠️ BOT_TOKEN не задан");
@@ -28,6 +32,7 @@ const adapter = new JSONFile(dbFile);
 const db = new Low(adapter, { users: {} });
 await db.read();
 db.data ||= { users: {} };
+db.data.users ||= {};
 await db.write();
 
 const LANGS = {
@@ -53,17 +58,26 @@ function getUser(tgId) {
   db.data.users[id] ||= {
     tg_id: id,
     lang: "ru",
+    language_selected: false,
+    subscribed: false,
     reg: false,
     paid: false,
     access: false,
+    username: null,
+    first_name: null,
+    referrer_id: null,
     menu_chat_id: null,
     menu_message_id: null,
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
   const u = db.data.users[id];
-  if (typeof u.access !== "boolean") u.access = !!(u.reg && u.paid);
   if (!u.lang || !LANGS[u.lang]) u.lang = "ru";
+  if (typeof u.language_selected !== "boolean") u.language_selected = false;
+  if (typeof u.subscribed !== "boolean") u.subscribed = false;
+  if (typeof u.reg !== "boolean") u.reg = false;
+  if (typeof u.paid !== "boolean") u.paid = false;
+  computeAccess(u);
   return u;
 }
 
@@ -89,10 +103,6 @@ async function tgCall(method, payload) {
   } catch {
     return null;
   }
-}
-
-async function tgSend(chatId, text, extra = {}) {
-  return tgCall("sendMessage", { chat_id: chatId, text, ...extra });
 }
 
 function verifyInitData(initData) {
@@ -131,11 +141,75 @@ function internalAuth(req, res, next) {
   next();
 }
 
+function t(lang, key, extra = {}) {
+  const ru = {
+    depositTitle: "<b>ШАГ 2 ИЗ 2</b>",
+    depositText: `РЕГИСТРАЦИЯ ПОДТВЕРЖДЕНА.\n\nТеперь <b>ПОПОЛНИ</b> игровой счёт на минимальную сумму:\n<b>${MIN_DEPOSIT}</b>.\n\nПосле подтверждения депозита доступ к сигналам откроется <b>АВТОМАТИЧЕСКИ</b>.`,
+    accessTitle: "<b>ДОСТУП АКТИВЕН</b>",
+    accessText: `Ваш аккаунт <b>ПОДТВЕРЖДЁН</b>.\nОткройте приложение и получите сигнал для <b>MINES</b>.`,
+    backBtn: "⬅️ Вернуться в главное меню",
+    depositBtn: "💳 Пополнить счёт",
+    openAppBtn: "🎮 Открыть RISK MODE"
+  };
+  const en = {
+    depositTitle: "<b>STEP 2 OF 2</b>",
+    depositText: `REGISTRATION CONFIRMED.\n\nNow <b>TOP UP</b> your gaming balance by the minimum amount:\n<b>${MIN_DEPOSIT}</b>.\n\nAfter the deposit is confirmed, access will be unlocked <b>AUTOMATICALLY</b>.`,
+    accessTitle: "<b>ACCESS ACTIVE</b>",
+    accessText: `Your account is <b>CONFIRMED</b>.\nOpen the app and get a signal for <b>MINES</b>.`,
+    backBtn: "⬅️ Back to main menu",
+    depositBtn: "💳 Deposit",
+    openAppBtn: "🎮 Open RISK MODE"
+  };
+  const dict = lang === "en" ? en : ru;
+  return dict[key];
+}
+
+async function updateStoredMenu(u) {
+  if (!u.menu_chat_id || !u.menu_message_id) return;
+  let media;
+  let caption;
+  let reply_markup;
+
+  if (u.paid && u.access) {
+    media = `${BASE_URL}/bot/menu-access.png`;
+    caption = `${t(u.lang, "accessTitle")}\n\n${t(u.lang, "accessText")}`;
+    reply_markup = {
+      inline_keyboard: [
+        [{ text: t(u.lang, "openAppBtn"), web_app: { url: `${BASE_URL}/` } }],
+        [{ text: t(u.lang, "backBtn"), callback_data: "main_menu" }]
+      ]
+    };
+  } else if (u.reg) {
+    media = `${BASE_URL}/bot/menu-step2.png`;
+    caption = `${t(u.lang, "depositTitle")}\n\n${t(u.lang, "depositText")}`;
+    reply_markup = {
+      inline_keyboard: [
+        [{ text: t(u.lang, "depositBtn"), url: `${BASE_URL}/go?tg=${u.tg_id}` }],
+        [{ text: t(u.lang, "backBtn"), callback_data: "main_menu" }]
+      ]
+    };
+  } else {
+    return;
+  }
+
+  await tgCall("editMessageMedia", {
+    chat_id: u.menu_chat_id,
+    message_id: Number(u.menu_message_id),
+    media: {
+      type: "photo",
+      media,
+      caption,
+      parse_mode: "HTML"
+    },
+    reply_markup
+  });
+}
+
 const app = express();
 app.use(express.json({ limit: "256kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res, next) => {
+app.get("/", (req, res) => {
   return res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
@@ -164,25 +238,14 @@ app.get("/pb", async (req, res) => {
     u.reg = true;
   }
 
-  if (event === "ftd" && amount >= MIN_DEPOSIT) {
+  if (event === "ftd" && amount >= MIN_DEPOSIT_NUM) {
     u.reg = true;
     u.paid = true;
   }
 
   computeAccess(u);
   await save();
-
-  if (event === "reg") {
-    await tgSend(sub1, "✅ Регистрация подтверждена. Теперь вернись в меню и нажми «Получить сигнал»." );
-  }
-
-  if (event === "ftd") {
-    if (amount >= MIN_DEPOSIT) {
-      await tgSend(sub1, "🔥 Доступ открыт. Вернись в меню и нажми «Получить сигнал»." );
-    } else {
-      await tgSend(sub1, `ℹ️ Депозит ${amount}. Нужно минимум ${MIN_DEPOSIT}.`);
-    }
-  }
+  await updateStoredMenu(u);
 
   res.send("ok");
 });
@@ -192,7 +255,7 @@ app.get("/internal/user/:tgId", internalAuth, async (req, res) => {
   const u = getUser(req.params.tgId);
   computeAccess(u);
   await save();
-  res.json({ ok: true, user: u, min_deposit: MIN_DEPOSIT });
+  res.json({ ok: true, user: u, min_deposit: MIN_DEPOSIT, ref_reward: REF_REWARD });
 });
 
 app.post("/internal/user/:tgId", internalAuth, async (req, res) => {
@@ -201,15 +264,41 @@ app.post("/internal/user/:tgId", internalAuth, async (req, res) => {
   const body = req.body || {};
 
   if (typeof body.lang === "string" && LANGS[body.lang]) u.lang = body.lang;
+  if (typeof body.language_selected === "boolean") u.language_selected = body.language_selected;
+  if (typeof body.subscribed === "boolean") u.subscribed = body.subscribed;
   if (typeof body.menu_chat_id !== "undefined") u.menu_chat_id = body.menu_chat_id;
   if (typeof body.menu_message_id !== "undefined") u.menu_message_id = body.menu_message_id;
+  if (typeof body.username !== "undefined") u.username = body.username;
+  if (typeof body.first_name !== "undefined") u.first_name = body.first_name;
+  if (typeof body.referrer_id !== "undefined" && !u.referrer_id) u.referrer_id = String(body.referrer_id || "") || null;
   if (typeof body.reg === "boolean") u.reg = body.reg;
   if (typeof body.paid === "boolean") u.paid = body.paid;
   computeAccess(u);
   u.updatedAt = Date.now();
   await save();
 
-  res.json({ ok: true, user: u, min_deposit: MIN_DEPOSIT });
+  res.json({ ok: true, user: u, min_deposit: MIN_DEPOSIT, ref_reward: REF_REWARD });
+});
+
+app.get("/internal/referrals/:tgId", internalAuth, async (req, res) => {
+  await db.read();
+  const tgId = String(req.params.tgId);
+  getUser(tgId);
+  const users = Object.values(db.data.users || {});
+  const invited = users.filter((u) => String(u.referrer_id || "") === tgId);
+  const withDeposit = invited.filter((u) => !!u.paid).length;
+  const activeAccess = invited.filter((u) => !!u.access).length;
+  const link = BOT_USERNAME ? `https://t.me/${BOT_USERNAME}?start=ref_${tgId}` : "";
+  res.json({
+    ok: true,
+    stats: {
+      link,
+      total_invited: invited.length,
+      with_deposit: withDeposit,
+      active_access: activeAccess,
+      reward_amount: REF_REWARD
+    }
+  });
 });
 
 app.post("/api/me", async (req, res) => {
