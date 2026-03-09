@@ -66,6 +66,8 @@ const L = {
     subRequiredTitle: "<b>ПОДПИШИСЬ НА КАНАЛ</b>",
     subRequiredText: (name) => `👋 Добро пожаловать, <b>${name}</b>!\n\nЧтобы использовать бота, пожалуйста, подпишитесь на наш канал 👏`,
     subFail: "Сначала подпишитесь на канал, затем нажмите «Проверить подписку».",
+    subStillMissingTitle: "<b>ПОДПИШИСЬ НА КАНАЛ</b>",
+    subStillMissingText: (name) => `👋 <b>${name}</b>, подписка пока не найдена.\n\n<b>ОБЯЗАТЕЛЬНО</b> подпишитесь на канал и только после этого нажмите <b>«Проверить подписку»</b>.`,
     subOk: "Подписка подтверждена.",
     mainTitle: "<b>ГЛАВНОЕ МЕНЮ</b>",
     mainText: (name) => `👋 <b>${name}</b>, Добро пожаловать в 🔶 <b>RISK MODE BOT</b> 🔶!\n\n🚀 Этот бот поможет вам лучше ориентироваться в популярных играх, использовать полезные инструменты и получать больше возможностей для уверенной игры.\n\n🎯 В основе работы — интеллектуальная система анализа, которая обрабатывает данные и помогает находить более точные и взвешенные решения.\n\n🔥 Запускайте игру, следуйте рекомендациям и повышайте свои шансы на лучший результат!`,
@@ -104,6 +106,8 @@ const L = {
     subRequiredTitle: "<b>SUBSCRIBE TO CHANNEL</b>",
     subRequiredText: (name) => `👋 Welcome, <b>${name}</b>!\n\nTo use the bot, please subscribe to our channel 👏`,
     subFail: "Subscribe to the channel first, then tap “Check subscription”.",
+    subStillMissingTitle: "<b>SUBSCRIBE TO CHANNEL</b>",
+    subStillMissingText: (name) => `👋 <b>${name}</b>, subscription is still not found.\n\n<b>MAKE SURE</b> you subscribe to the channel and only then tap <b>“Check subscription”</b>.`,
     subOk: "Subscription confirmed.",
     mainTitle: "<b>MAIN MENU</b>",
     mainText: (name) => `👋 <b>${name}</b>, welcome to 🔶 <b>RISK MODE BOT</b> 🔶!\n\n🚀 This bot helps you navigate popular games, use useful tools and get more options for a more confident play.\n\n🎯 At the core is an intelligent analysis system that processes data and helps find more accurate and balanced decisions.\n\n🔥 Launch the game, follow the recommendations and improve your chances of a better result!`,
@@ -343,12 +347,28 @@ function simpleBackKeyboard(lang) {
   return { inline_keyboard: [[{ text: p.backBtn, callback_data: "main_menu" }]] };
 }
 
+function resolveChannelTarget() {
+  if (CHANNEL_ID) return CHANNEL_ID;
+
+  if (CHANNEL_URL) {
+    const match = CHANNEL_URL.match(/t\.me\/(?:\+|joinchat\/)?([^/?#]+)/i);
+    if (match && match[1]) {
+      return `@${match[1].replace(/^@/, "")}`;
+    }
+  }
+
+  return "";
+}
+
 async function isSubscribed(chatId) {
-  if (!CHANNEL_ID) return true;
+  const channelTarget = resolveChannelTarget();
+  if (!channelTarget) return true;
+
   try {
-    const member = await bot.getChatMember(CHANNEL_ID, chatId);
+    const member = await bot.getChatMember(channelTarget, chatId);
     return ["member", "administrator", "creator"].includes(member.status);
-  } catch {
+  } catch (e) {
+    console.log("subscription_check_error:", e?.response?.body || e?.message || e);
     return false;
   }
 }
@@ -362,6 +382,11 @@ async function showLanguage(chatId, existingUser = null) {
 function subscribeCaption(lang, name) {
   const p = tr(lang);
   return `${p.subRequiredTitle}\n\n${p.subRequiredText(name)}`;
+}
+
+function subscribeFailCaption(lang, name) {
+  const p = tr(lang);
+  return `${p.subStillMissingTitle}\n\n${p.subStillMissingText(name)}`;
 }
 
 function mainCaption(lang, name) {
@@ -380,6 +405,14 @@ async function showSubscribe(queryOrChatId, user, from = null, edit = false) {
     const msg = await sendMenuPhoto(queryOrChatId, "subscribe", caption, subscribeKeyboard(lang));
     await upsertMenuMeta(queryOrChatId, msg.message_id, user);
   }
+}
+
+async function showSubscribeFail(queryOrChatId, user, from = null) {
+  const lang = user.lang || "ru";
+  const name = getDisplayName(from, user);
+  const caption = subscribeFailCaption(lang, name);
+  await editMenu(queryOrChatId, "subscribe", caption, subscribeKeyboard(lang));
+  await upsertMenuMeta(queryOrChatId.message.chat.id, queryOrChatId.message.message_id, user);
 }
 
 async function showMain(queryOrChatId, user, from = null, edit = false) {
@@ -479,7 +512,7 @@ bot.on("callback_query", async (query) => {
       try {
         await bot.answerCallbackQuery(query.id, { text: p.subFail, show_alert: true });
       } catch {}
-      await showSubscribe(query, user, query.from, true);
+      await showSubscribeFail(query, user, query.from);
       return;
     }
 
