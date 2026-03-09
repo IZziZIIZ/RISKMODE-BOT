@@ -66,6 +66,9 @@ function getUser(tgId) {
     username: null,
     first_name: null,
     referrer_id: null,
+    ref_rewarded: false,
+    ref_earned: 0,
+    ref_paid: 0,
     menu_chat_id: null,
     menu_message_id: null,
     createdAt: Date.now(),
@@ -77,6 +80,9 @@ function getUser(tgId) {
   if (typeof u.subscribed !== "boolean") u.subscribed = false;
   if (typeof u.reg !== "boolean") u.reg = false;
   if (typeof u.paid !== "boolean") u.paid = false;
+  if (typeof u.ref_rewarded !== "boolean") u.ref_rewarded = false;
+  if (typeof u.ref_earned !== "number") u.ref_earned = 0;
+  if (typeof u.ref_paid !== "number") u.ref_paid = 0;
   computeAccess(u);
   return u;
 }
@@ -241,6 +247,13 @@ app.get("/pb", async (req, res) => {
   if (event === "ftd" && amount >= MIN_DEPOSIT_NUM) {
     u.reg = true;
     u.paid = true;
+
+    if (!u.ref_rewarded && u.referrer_id) {
+      const refUser = getUser(u.referrer_id);
+      refUser.ref_earned = Number(refUser.ref_earned || 0) + REF_REWARD;
+      refUser.updatedAt = Date.now();
+      u.ref_rewarded = true;
+    }
   }
 
   computeAccess(u);
@@ -271,6 +284,8 @@ app.post("/internal/user/:tgId", internalAuth, async (req, res) => {
   if (typeof body.username !== "undefined") u.username = body.username;
   if (typeof body.first_name !== "undefined") u.first_name = body.first_name;
   if (typeof body.referrer_id !== "undefined" && !u.referrer_id) u.referrer_id = String(body.referrer_id || "") || null;
+  if (typeof body.ref_earned === "number") u.ref_earned = body.ref_earned;
+  if (typeof body.ref_paid === "number") u.ref_paid = body.ref_paid;
   if (typeof body.reg === "boolean") u.reg = body.reg;
   if (typeof body.paid === "boolean") u.paid = body.paid;
   computeAccess(u);
@@ -286,16 +301,19 @@ app.get("/internal/referrals/:tgId", internalAuth, async (req, res) => {
   getUser(tgId);
   const users = Object.values(db.data.users || {});
   const invited = users.filter((u) => String(u.referrer_id || "") === tgId);
+  const registered = invited.filter((u) => !!u.reg).length;
   const withDeposit = invited.filter((u) => !!u.paid).length;
-  const activeAccess = invited.filter((u) => !!u.access).length;
+  const owner = getUser(tgId);
   const link = BOT_USERNAME ? `https://t.me/${BOT_USERNAME}?start=ref_${tgId}` : "";
   res.json({
     ok: true,
     stats: {
       link,
       total_invited: invited.length,
+      registered,
       with_deposit: withDeposit,
-      active_access: activeAccess,
+      earned: Number(owner.ref_earned || 0),
+      paid: Number(owner.ref_paid || 0),
       reward_amount: REF_REWARD
     }
   });

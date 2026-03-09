@@ -82,7 +82,7 @@ const L = {
     userAccessTitle: "<b>ВАШ ДОСТУП</b>",
     userAccessText: (user, minDeposit) => `🆔 <b>Ваш Telegram ID:</b> <code>${user.tg_id}</code>\n\n👤 <b>Регистрация:</b> ${user.reg ? "✅ подтверждена" : "❌ не подтверждена"}\n💳 <b>Депозит:</b> ${user.paid ? "✅ подтверждён" : `❌ нет депозита (минимум ${minDeposit})`}\n🎮 <b>Доступ к игре:</b> ${user.access ? "✅ открыт" : "❌ закрыт"}`,
     referralTitle: "<b>РЕФЕРАЛЬНАЯ СИСТЕМА</b>",
-    referralText: (stats) => `🎁 Приглашай друзей и получай бонусы!\n\n👥 За каждого пользователя, который зарегистрируется и сделает пополнение по твоей ссылке, ты получишь бонус <b>${stats.reward_amount} RUB</b>.\n\n📎 <b>Твоя реферальная ссылка:</b>\n<code>${stats.link || "-"}</code>\n\n📊 <b>Статистика:</b>\n• Всего приглашено: <b>${stats.total_invited}</b>\n• С депозитом: <b>${stats.with_deposit}</b>\n• С активным доступом: <b>${stats.active_access}</b>`,
+    referralText: (stats) => `🎁 Приглашай друзей и получай бонусы!\n\n👥 За каждого пользователя, который зарегистрируется и сделает пополнение по твоей ссылке, ты получишь бонус <b>${stats.reward_amount} RUB</b>.\n\n📎 <b>Твоя реферальная ссылка:</b>\n<code>${stats.link || "-"}</code>\n\n📊 <b>Статистика:</b>\n• Всего приглашено: <b>${stats.total_invited}</b>\n• Зарегистрированы: <b>${stats.registered}</b>\n• С депозитом: <b>${stats.with_deposit}</b>\n• Заработано: <b>${stats.earned} RUB</b>\n• Выплачено: <b>${stats.paid} RUB</b>`,
     langSaved: "Язык сохранён."
   },
   en: {
@@ -122,7 +122,7 @@ const L = {
     userAccessTitle: "<b>YOUR ACCESS</b>",
     userAccessText: (user, minDeposit) => `🆔 <b>Your Telegram ID:</b> <code>${user.tg_id}</code>\n\n👤 <b>Registration:</b> ${user.reg ? "✅ confirmed" : "❌ not confirmed"}\n💳 <b>Deposit:</b> ${user.paid ? "✅ confirmed" : `❌ missing (minimum ${minDeposit})`}\n🎮 <b>Game access:</b> ${user.access ? "✅ open" : "❌ closed"}`,
     referralTitle: "<b>REFERRAL SYSTEM</b>",
-    referralText: (stats) => `🎁 Invite friends and get rewards!\n\n👥 For each user who registers and makes a deposit using your link, you receive <b>${stats.reward_amount} RUB</b>.\n\n📎 <b>Your referral link:</b>\n<code>${stats.link || "-"}</code>\n\n📊 <b>Stats:</b>\n• Invited: <b>${stats.total_invited}</b>\n• With deposit: <b>${stats.with_deposit}</b>\n• Active access: <b>${stats.active_access}</b>`,
+    referralText: (stats) => `🎁 Invite friends and get rewards!\n\n👥 For each user who registers and makes a deposit using your link, you receive <b>${stats.reward_amount} RUB</b>.\n\n📎 <b>Your referral link:</b>\n<code>${stats.link || "-"}</code>\n\n📊 <b>Stats:</b>\n• Invited: <b>${stats.total_invited}</b>\n• Registered: <b>${stats.registered}</b>\n• With deposit: <b>${stats.with_deposit}</b>\n• Earned: <b>${stats.earned} RUB</b>\n• Paid out: <b>${stats.paid} RUB</b>`,
     langSaved: "Language saved."
   }
 };
@@ -203,16 +203,20 @@ async function getReferralStats(tgId) {
     return data.stats || {
       link: BOT_USERNAME ? `https://t.me/${BOT_USERNAME}?start=ref_${tgId}` : "",
       total_invited: 0,
+      registered: 0,
       with_deposit: 0,
-      active_access: 0,
+      earned: 0,
+      paid: 0,
       reward_amount: 150
     };
   } catch {
     return {
       link: BOT_USERNAME ? `https://t.me/${BOT_USERNAME}?start=ref_${tgId}` : "",
       total_invited: 0,
+      registered: 0,
       with_deposit: 0,
-      active_access: 0,
+      earned: 0,
+      paid: 0,
       reward_amount: 150
     };
   }
