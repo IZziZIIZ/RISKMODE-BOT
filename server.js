@@ -18,13 +18,14 @@ const MIN_DEPOSIT_NUM = Number(String(process.env.MIN_DEPOSIT || "1500").match(/
 const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || "change-me";
 const BOT_USERNAME = (process.env.BOT_USERNAME || "").replace(/^@/, "");
 const REF_REWARD = Number(process.env.REF_REWARD || 150);
+const POSTBACK_SECRET = process.env.POSTBACK_SECRET || "";
 const PORT = Number(process.env.PORT || 3000);
 
 if (!BOT_TOKEN) console.log("⚠️ BOT_TOKEN не задан");
 if (!BASE_URL) console.log("⚠️ BASE_URL не задан");
 if (!ONEWIN_LINK) console.log("⚠️ ONEWIN_LINK не задан");
 if (INTERNAL_TOKEN === "change-me") console.log("⚠️ INTERNAL_TOKEN не задан");
-console.log(`🗄️ DB_PATH: ${process.env.DB_PATH || "./data/db.json"}`);
+if (!POSTBACK_SECRET) console.log("⚠️ POSTBACK_SECRET не задан");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -158,6 +159,17 @@ function internalAuth(req, res, next) {
   next();
 }
 
+function verifyPostbackSecret(req) {
+  if (!POSTBACK_SECRET) return true;
+  const secret = String(req.query.secret || req.get("x-postback-secret") || "");
+  return secret === POSTBACK_SECRET;
+}
+
+function isValidTelegramId(value) {
+  return /^\d{5,20}$/.test(String(value || ""));
+}
+
+
 function t(lang, key, extra = {}) {
   const ru = {
     depositTitle: "<b>ШАГ 2 ИЗ 2</b>",
@@ -236,7 +248,7 @@ app.get("/healthz", (req, res) => {
 
 app.get("/go", (req, res) => {
   const tg = String(req.query.tg || "");
-  if (!tg) return res.status(400).send("no tg");
+  if (!isValidTelegramId(tg)) return res.status(400).send("bad tg");
   const join = ONEWIN_LINK.includes("?") ? "&" : "?";
   return res.redirect(`${ONEWIN_LINK}${join}sub1=${encodeURIComponent(tg)}`);
 });
@@ -246,8 +258,23 @@ app.get("/pb", async (req, res) => {
   const sub1 = String(req.query.sub1 || "");
   const amount = Number(req.query.amount || 0);
 
-  if (!event || !sub1) return res.status(400).send("bad");
+  if (!verifyPostbackSecret(req)) {
+    return res.status(401).send("bad secret");
+  }
 
+  if (!["reg", "ftd"].includes(event)) {
+    return res.status(400).send("bad event");
+  }
+
+  if (!isValidTelegramId(sub1)) {
+    return res.status(400).send("bad sub1");
+  }
+
+  if (event === "ftd" && (!Number.isFinite(amount) || amount < 0)) {
+    return res.status(400).send("bad amount");
+  }
+
+  await db.read();
   const u = getUser(sub1);
   u.updatedAt = Date.now();
 
@@ -408,4 +435,6 @@ app.post("/api/signal", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ Server on :${PORT}`);
+  console.log(`🗄️ DB_PATH: ${DB_PATH}`);
+  console.log(`🔐 POSTBACK_SECRET: ${POSTBACK_SECRET ? "enabled" : "disabled"}`);
 });
