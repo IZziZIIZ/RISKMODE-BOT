@@ -3,6 +3,7 @@ import express from "express";
 import crypto from "crypto";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
@@ -23,12 +24,22 @@ if (!BOT_TOKEN) console.log("⚠️ BOT_TOKEN не задан");
 if (!BASE_URL) console.log("⚠️ BASE_URL не задан");
 if (!ONEWIN_LINK) console.log("⚠️ ONEWIN_LINK не задан");
 if (INTERNAL_TOKEN === "change-me") console.log("⚠️ INTERNAL_TOKEN не задан");
+console.log(`🗄️ DB_PATH: ${process.env.DB_PATH || "./data/db.json"}`);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbFile = path.join(__dirname, "data", "db.json");
-const adapter = new JSONFile(dbFile);
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "db.json");
+const dbDir = path.dirname(DB_PATH);
+
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+if (!fs.existsSync(DB_PATH)) {
+  fs.writeFileSync(DB_PATH, JSON.stringify({ users: {} }, null, 2), "utf-8");
+}
+
+const adapter = new JSONFile(DB_PATH);
 const db = new Low(adapter, { users: {} });
 await db.read();
 db.data ||= { users: {} };
