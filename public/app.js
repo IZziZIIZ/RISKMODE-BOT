@@ -24,12 +24,15 @@ const historyNext = $("historyNext");
 const historyCounter = $("historyCounter");
 const latestBadge = $("latestBadge");
 const btnCloseHistory = $("btnCloseHistory");
+const toast = $("toast");
 
 let selectedMines = 1;
 let selectedMode = "single";
 let historyItems = loadHistory();
 let historyIndex = 0;
 let currentLang = pickInitialLang();
+let meState = null;
+let meLoaded = false;
 
 const LANGS = [
   { code: "ru", label: "Русский", flag: "ru" },
@@ -50,21 +53,44 @@ const LANGS = [
 ];
 
 const TEXT = {
-  ru: { history: "History", mines: "Mines", mode: "Mode", single: "Single", all: "All", play: "Play", generating: "Генерация...", back: "Back", latest: "LATEST", prev: "← Prev", next: "Next →" },
-  en: { history: "History", mines: "Mines", mode: "Mode", single: "Single", all: "All", play: "Play", generating: "Generating...", back: "Back", latest: "LATEST", prev: "← Prev", next: "Next →" },
-  tr: { history: "Geçmiş", mines: "Mayın", mode: "Mod", single: "Tek", all: "Tümü", play: "Oyna", generating: "Oluşturuluyor...", back: "Geri", latest: "SON", prev: "← Önceki", next: "Sonraki →" },
-  es: { history: "Historial", mines: "Minas", mode: "Modo", single: "Único", all: "Todo", play: "Jugar", generating: "Generando...", back: "Atrás", latest: "ÚLTIMO", prev: "← Anterior", next: "Siguiente →" },
-  "pt": { history: "Histórico", mines: "Minas", mode: "Modo", single: "Único", all: "Todos", play: "Jogar", generating: "Gerando...", back: "Voltar", latest: "ÚLTIMO", prev: "← Anterior", next: "Próximo →" },
-  "pt-br": { history: "Histórico", mines: "Minas", mode: "Modo", single: "Único", all: "Todos", play: "Jogar", generating: "Gerando...", back: "Voltar", latest: "ÚLTIMO", prev: "← Anterior", next: "Próximo →" },
-  ar: { history: "Historial", mines: "Minas", mode: "Modo", single: "Único", all: "Todo", play: "Jugar", generating: "Generando...", back: "Atrás", latest: "ÚLTIMO", prev: "← Anterior", next: "Siguiente →" },
-  sa: { history: "السجل", mines: "الألغام", mode: "الوضع", single: "فردي", all: "الكل", play: "ابدأ", generating: "جارٍ الإنشاء...", back: "رجوع", latest: "الأحدث", prev: "← السابق", next: "التالي →" },
-  it: { history: "Cronologia", mines: "Mine", mode: "Modalità", single: "Singolo", all: "Tutto", play: "Gioca", generating: "Generazione...", back: "Indietro", latest: "ULTIMO", prev: "← Precedente", next: "Successivo →" },
-  hi: { history: "इतिहास", mines: "माइन्स", mode: "मोड", single: "सिंगल", all: "ऑल", play: "Play", generating: "बनाया जा रहा है...", back: "वापस", latest: "लेटेस्ट", prev: "← पिछला", next: "अगला →" },
-  uk: { history: "Історія", mines: "Міни", mode: "Режим", single: "Один", all: "Усі", play: "Грати", generating: "Генерація...", back: "Назад", latest: "ОСТАННІЙ", prev: "← Попередній", next: "Наступний →" },
-  kz: { history: "Тарих", mines: "Миналар", mode: "Режим", single: "Single", all: "All", play: "Ойнату", generating: "Жасалуда...", back: "Артқа", latest: "СОҢҒЫ", prev: "← Алдыңғы", next: "Келесі →" },
-  uz: { history: "Tarix", mines: "Minalar", mode: "Rejim", single: "Single", all: "All", play: "O‘ynash", generating: "Yaratilmoqda...", back: "Orqaga", latest: "SO‘NGGI", prev: "← Oldingi", next: "Keyingi →" },
-  az: { history: "Tarixçə", mines: "Minalar", mode: "Rejim", single: "Single", all: "All", play: "Oyna", generating: "Yaradılır...", back: "Geri", latest: "SON", prev: "← Əvvəlki", next: "Növbəti →" },
-  hy: { history: "Պատմություն", mines: "Մայնս", mode: "Ռեժիմ", single: "Single", all: "All", play: "Play", generating: "Ստեղծվում է...", back: "Back", latest: "ՎԵՐՋԻՆ", prev: "← Նախորդ", next: "Հաջորդ →" }
+  ru: {
+    history: "History",
+    mines: "Mines",
+    mode: "Mode",
+    single: "Single",
+    all: "All",
+    play: "Play",
+    generating: "Генерация...",
+    loading: "Проверка доступа...",
+    noTelegram: "Откройте приложение из Telegram.",
+    noAccess: "Доступ к WebApp пока не открыт.",
+    badRequest: "Не удалось получить сигнал.",
+    accessDenied: "Доступ закрыт. Сначала завершите регистрацию и депозит.",
+    serverError: "Ошибка сервера. Попробуйте ещё раз.",
+    back: "Back",
+    latest: "LATEST",
+    prev: "← Prev",
+    next: "Next →"
+  },
+  en: {
+    history: "History",
+    mines: "Mines",
+    mode: "Mode",
+    single: "Single",
+    all: "All",
+    play: "Play",
+    generating: "Generating...",
+    loading: "Checking access...",
+    noTelegram: "Open the app from Telegram.",
+    noAccess: "Access to the WebApp is not open yet.",
+    badRequest: "Failed to get signal.",
+    accessDenied: "Access denied. Finish registration and deposit first.",
+    serverError: "Server error. Try again.",
+    back: "Back",
+    latest: "LATEST",
+    prev: "← Prev",
+    next: "Next →"
+  }
 };
 
 function t(key){
@@ -85,6 +111,16 @@ function pickInitialLang(){
   if (l.startsWith("uk")) return "uk";
   if (l.startsWith("hi")) return "hi";
   return "en";
+}
+
+function showToast(text){
+  if (!toast) return;
+  toast.textContent = text;
+  toast.hidden = false;
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => {
+    toast.hidden = true;
+  }, 2800);
 }
 
 function setLang(lang){
@@ -171,7 +207,7 @@ function updateThumb(slider, idx){
   const thumb = slider.querySelector(".segThumb");
   const total = slider.querySelectorAll(".segSlideBtn").length;
   const pct = 100 / total;
-  thumb.style.width = `calc(${pct}% - ${((total-1)*6)/total}px)`;
+  thumb.style.width = `calc(${pct}% - ${((total - 1) * 6) / total}px)`;
   thumb.style.transform = `translateX(calc(${idx} * (100% + 6px)))`;
 }
 
@@ -193,7 +229,7 @@ function setMode(value){
 
 function buildBoard(){
   board.innerHTML = "";
-  for (let i=0;i<25;i++){
+  for (let i = 0; i < 25; i++){
     const cell = document.createElement("div");
     cell.className = "cell";
     cell.innerHTML = '<div class="spark"></div>';
@@ -206,7 +242,7 @@ function revealCell(index, type){
   if (!cell) return;
   cell.classList.add("reveal");
   cell.classList.remove("star","trap","emptyReveal");
-  cell.querySelectorAll(".iconMark").forEach(n=>n.remove());
+  cell.querySelectorAll(".iconMark").forEach(n => n.remove());
   if (type === 1 || type === 2){
     cell.classList.add(type === 1 ? "star" : "trap");
     const img = document.createElement("img");
@@ -219,29 +255,8 @@ function revealCell(index, type){
   }
 }
 
-function starsFor(mines){ return ({1:7,3:5,5:4,7:3})[mines] || 7; }
-
-function pick(arr, n){
-  const copy = arr.slice();
-  for(let i=copy.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [copy[i],copy[j]] = [copy[j],copy[i]];
-  }
-  return copy.slice(0,n);
-}
-
-function generateResult(mines, mode){
-  const all = Array.from({length:25}, (_,i)=>i);
-  const crosses = mines;
-  const crossPos = pick(all, crosses).sort((a,b)=>a-b);
-  const grid = Array(25).fill(1);
-  crossPos.forEach(i => grid[i] = 2);
-  const steps = pick(all.filter(i => grid[i] === 1), starsFor(mines));
-  return { ok:true, mines, mode, stars: starsFor(mines), grid, steps, ts: Date.now() };
-}
-
 function saveHistory(items){ localStorage.setItem("rm_history_gallery", JSON.stringify(items.slice(0,20))); }
-function loadHistory(){ try{return JSON.parse(localStorage.getItem("rm_history_gallery")||"[]")}catch{return []} }
+function loadHistory(){ try { return JSON.parse(localStorage.getItem("rm_history_gallery") || "[]"); } catch { return []; } }
 function pushHistory(item){ historyItems.unshift(item); historyItems = historyItems.slice(0,20); saveHistory(historyItems); }
 
 function renderHistoryView(){
@@ -257,14 +272,14 @@ function renderHistoryView(){
   historyIndex = Math.max(0, Math.min(historyIndex, historyItems.length - 1));
   const item = historyItems[historyIndex];
   const dt = new Date(item.ts);
-  historyMeta.textContent = `${item.mode === 'single' ? t('single') : t('all')} • ${item.mines} ${t('mines').toLowerCase()} • ${dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+  historyMeta.textContent = `${item.mode === "single" ? t("single") : t("all")} • ${item.mines} ${t("mines").toLowerCase()} • ${dt.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`;
   historyCounter.textContent = `${historyIndex + 1} / ${historyItems.length}`;
-  latestBadge.style.visibility = historyIndex === 0 ? 'visible' : 'hidden';
+  latestBadge.style.visibility = historyIndex === 0 ? "visible" : "hidden";
   historyPrev.disabled = historyIndex >= historyItems.length - 1;
   historyNext.disabled = historyIndex <= 0;
   historyPreviewBoard.innerHTML = item.grid.map(type => `
-    <div class="pCell ${type === 1 ? 'star' : 'trap'}">
-      <img src="${type === 1 ? '/assets/icons/star.svg' : '/assets/icons/trap.svg'}" alt="">
+    <div class="pCell ${type === 1 ? "star" : "trap"}">
+      <img src="${type === 1 ? "/assets/icons/star.svg" : "/assets/icons/trap.svg"}" alt="">
     </div>`).join("");
 }
 
@@ -274,7 +289,10 @@ function openHistory(){
   renderHistoryView();
   historyOverlay.hidden = false;
 }
-function closeHistory(){ historyOverlay.hidden = true; }
+
+function closeHistory(){
+  historyOverlay.hidden = true;
+}
 
 function animateSingle(result){
   let i = 0;
@@ -282,7 +300,7 @@ function animateSingle(result){
   const tick = () => {
     if (i >= order.length){
       btnPlay.disabled = false;
-      btnPlay.textContent = t('play');
+      btnPlay.textContent = t("play");
       return;
     }
     revealCell(order[i], 1);
@@ -293,54 +311,145 @@ function animateSingle(result){
 }
 
 function animateAll(result){
-  const order = Array.from({length:25}, (_,i)=>i);
+  const order = Array.from({ length: 25 }, (_, i) => i);
   order.forEach((idx, i) => {
     setTimeout(() => revealCell(idx, result.grid[idx]), 160 + i * 105);
   });
   setTimeout(() => {
     btnPlay.disabled = false;
-    btnPlay.textContent = t('play');
+    btnPlay.textContent = t("play");
   }, 200 + order.length * 105);
 }
 
-async function play(){
+async function postJson(url, payload){
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+async function loadMe(){
+  if (!tg?.initData) {
+    meLoaded = true;
+    meState = { access: false };
+    btnPlay.disabled = true;
+    btnPlay.textContent = t("play");
+    showToast(t("noTelegram"));
+    return;
+  }
+
   btnPlay.disabled = true;
-  btnPlay.textContent = t('generating');
+  btnPlay.textContent = t("loading");
+
+  const result = await postJson("/api/me", { initData: tg.initData });
+  meLoaded = true;
+
+  if (!result.ok){
+    meState = { access: false };
+    btnPlay.disabled = true;
+    btnPlay.textContent = t("play");
+    showToast(t("serverError"));
+    return;
+  }
+
+  meState = result.data;
+  btnPlay.disabled = false;
+  btnPlay.textContent = t("play");
+
+  if (!meState.access){
+    showToast(t("noAccess"));
+  }
+}
+
+async function requestSignal(){
+  if (!tg?.initData) {
+    return { ok: false, status: 400, data: { error: "no initData" } };
+  }
+  return postJson("/api/signal", {
+    initData: tg.initData,
+    mines: selectedMines,
+    mode: selectedMode
+  });
+}
+
+async function play(){
+  if (!meLoaded) {
+    await loadMe();
+  }
+
+  if (!tg?.initData) {
+    showToast(t("noTelegram"));
+    return;
+  }
+
+  if (!meState?.access) {
+    showToast(t("accessDenied"));
+    return;
+  }
+
+  btnPlay.disabled = true;
+  btnPlay.textContent = t("generating");
   buildBoard();
-  const result = generateResult(selectedMines, selectedMode);
-  pushHistory(result);
-  if (selectedMode === 'single') animateSingle(result);
-  else animateAll(result);
+
+  const result = await requestSignal();
+
+  if (!result.ok){
+    btnPlay.disabled = false;
+    btnPlay.textContent = t("play");
+
+    if (result.status === 403) {
+      meState = { ...(meState || {}), access: false };
+      showToast(t("accessDenied"));
+      return;
+    }
+
+    showToast(t("badRequest"));
+    return;
+  }
+
+  const signal = result.data;
+  pushHistory(signal);
+
+  if (selectedMode === "single") animateSingle(signal);
+  else animateAll(signal);
 }
 
 function init(){
-  try{ tg?.ready(); tg?.expand(); }catch{}
+  try {
+    tg?.ready();
+    tg?.expand();
+  } catch {}
+
   bindLang("homeLangBtn", "homeLangMenu");
   bindLang("minesLangBtn", "minesLangMenu");
   setLang(currentLang);
   buildBoard();
   setMines(1);
-  setMode('single');
+  setMode("single");
 
-  document.querySelector('.activeGame').addEventListener('click', () => openPage('mines'));
-  backFromMines.addEventListener('click', () => openPage('home'));
-  btnHistoryHead.addEventListener('click', openHistory);
-  btnCloseHistory.addEventListener('click', closeHistory);
-  historyOverlay.addEventListener('click', (e) => { if (e.target === historyOverlay) closeHistory(); });
-  historyPrev.addEventListener('click', () => { if (historyIndex < historyItems.length - 1){ historyIndex += 1; renderHistoryView(); } });
-  historyNext.addEventListener('click', () => { if (historyIndex > 0){ historyIndex -= 1; renderHistoryView(); } });
-  document.addEventListener('keydown', (e) => {
+  document.querySelector(".activeGame").addEventListener("click", () => openPage("mines"));
+  backFromMines.addEventListener("click", () => openPage("home"));
+  btnHistoryHead.addEventListener("click", openHistory);
+  btnCloseHistory.addEventListener("click", closeHistory);
+  historyOverlay.addEventListener("click", (e) => { if (e.target === historyOverlay) closeHistory(); });
+  historyPrev.addEventListener("click", () => { if (historyIndex < historyItems.length - 1){ historyIndex += 1; renderHistoryView(); } });
+  historyNext.addEventListener("click", () => { if (historyIndex > 0){ historyIndex -= 1; renderHistoryView(); } });
+  document.addEventListener("keydown", (e) => {
     if (historyOverlay.hidden) return;
-    if (e.key === 'Escape') closeHistory();
-    if (e.key === 'ArrowLeft' && historyIndex < historyItems.length - 1){ historyIndex += 1; renderHistoryView(); }
-    if (e.key === 'ArrowRight' && historyIndex > 0){ historyIndex -= 1; renderHistoryView(); }
+    if (e.key === "Escape") closeHistory();
+    if (e.key === "ArrowLeft" && historyIndex < historyItems.length - 1){ historyIndex += 1; renderHistoryView(); }
+    if (e.key === "ArrowRight" && historyIndex > 0){ historyIndex -= 1; renderHistoryView(); }
   });
 
-  minesSlider.querySelectorAll('[data-mines]').forEach(btn => btn.addEventListener('click', () => setMines(btn.dataset.mines)));
-  modeSlider.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
-  btnPlay.addEventListener('click', play);
+  minesSlider.querySelectorAll("[data-mines]").forEach(btn => btn.addEventListener("click", () => setMines(btn.dataset.mines)));
+  modeSlider.querySelectorAll("[data-mode]").forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
+  btnPlay.addEventListener("click", play);
 
-  if (location.hash === '#mines') openPage('mines');
+  if (location.hash === "#mines") openPage("mines");
+  loadMe();
 }
 
 init();
