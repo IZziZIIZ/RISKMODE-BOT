@@ -6,9 +6,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
-
 dotenv.config();
-
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const BASE_URL = (process.env.BASE_URL || "").replace(/\/$/, "");
 const ONEWIN_LINK = (process.env.ONEWIN_LINK || "").trim();
@@ -23,33 +21,27 @@ const BOT_USERNAME = (process.env.BOT_USERNAME || "").replace(/^@/, "");
 const REF_REWARD = Number(process.env.REF_REWARD || 150);
 const POSTBACK_SECRET = process.env.POSTBACK_SECRET || "";
 const PORT = Number(process.env.PORT || 3000);
-
 if (!BOT_TOKEN) console.log("⚠️ BOT_TOKEN не задан");
 if (!BASE_URL) console.log("⚠️ BASE_URL не задан");
 if (!ONEWIN_LINK) console.log("⚠️ ONEWIN_LINK не задан");
 if (INTERNAL_TOKEN === "change-me") console.log("⚠️ INTERNAL_TOKEN не задан");
 if (!POSTBACK_SECRET) console.log("⚠️ POSTBACK_SECRET не задан");
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "db.json");
 const dbDir = path.dirname(DB_PATH);
-
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 if (!fs.existsSync(DB_PATH)) {
   fs.writeFileSync(DB_PATH, JSON.stringify({ users: {} }, null, 2), "utf-8");
 }
-
 const adapter = new JSONFile(DB_PATH);
 const db = new Low(adapter, { users: {} });
 await db.read();
 db.data ||= { users: {} };
 db.data.users ||= {};
 await db.write();
-
 const LANGS = {
   ru: { name: "Русский", flag: "🇷🇺" },
   en: { name: "English", flag: "🇬🇧" },
@@ -67,7 +59,6 @@ const LANGS = {
   az: { name: "Azərbaycanca", flag: "🇦🇿" },
   hy: { name: "Հայերեն", flag: "🇦🇲" }
 };
-
 function firstNonEmpty(values = []) {
   for (const value of values) {
     const str = String(value ?? "").trim();
@@ -75,7 +66,6 @@ function firstNonEmpty(values = []) {
   }
   return "";
 }
-
 function numberFromAny(values = []) {
   for (const value of values) {
     if (value === undefined || value === null || value === "") continue;
@@ -85,14 +75,12 @@ function numberFromAny(values = []) {
   }
   return 0;
 }
-
 function normalizeEvent(source = {}) {
   const raw = String(source.event || source.status || source.type || "").trim().toLowerCase();
   if (["reg", "registration", "register", "signup", "sign_up"].includes(raw)) return "reg";
   if (["ftd", "deposit", "first_deposit", "firstdeposit", "first-deposit"].includes(raw)) return "ftd";
   return raw;
 }
-
 function extractTrackingId(source = {}) {
   return firstNonEmpty([
     source.sub1,
@@ -105,7 +93,6 @@ function extractTrackingId(source = {}) {
     source.tg
   ]);
 }
-
 function buildOneWinUrl(baseUrl, tgId) {
   let target = baseUrl.trim();
   const replacements = {
@@ -116,7 +103,6 @@ function buildOneWinUrl(baseUrl, tgId) {
     s1: tgId,
     tg: tgId
   };
-
   let replaced = false;
   for (const [key, value] of Object.entries(replacements)) {
     const token = `{${key}}`;
@@ -126,7 +112,6 @@ function buildOneWinUrl(baseUrl, tgId) {
     }
   }
   if (replaced) return target;
-
   try {
     const url = new URL(target);
     for (const key of ONEWIN_SUB_KEYS) {
@@ -139,7 +124,6 @@ function buildOneWinUrl(baseUrl, tgId) {
     return `${target}${join}${query}`;
   }
 }
-
 function getUser(tgId) {
   const id = String(tgId);
   db.data.users[id] ||= {
@@ -163,7 +147,6 @@ function getUser(tgId) {
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
-
   const u = db.data.users[id];
   if (!u.lang || !LANGS[u.lang]) u.lang = "ru";
   if (typeof u.language_selected !== "boolean") u.language_selected = false;
@@ -177,16 +160,13 @@ function getUser(tgId) {
   computeAccess(u);
   return u;
 }
-
 function computeAccess(u) {
   u.access = !!(u.reg && u.paid);
   return u.access;
 }
-
 async function save() {
   await db.write();
 }
-
 async function tgCall(method, payload) {
   if (!BOT_TOKEN) return null;
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
@@ -201,29 +181,22 @@ async function tgCall(method, payload) {
     return null;
   }
 }
-
 function verifyInitData(initData) {
   const params = new URLSearchParams(initData);
   const hash = params.get("hash");
   if (!hash) return { ok: false, reason: "no hash" };
-
   const pairs = [];
   for (const [key, value] of params.entries()) {
     if (key === "hash") continue;
     pairs.push([key, value]);
   }
-
   pairs.sort(([a], [b]) => a.localeCompare(b));
-  const dataCheckString = pairs.map(([k, v]) => `${k}=${v}`).join("
-");
-
+  const dataCheckString = pairs.map(([k, v]) => `${k}=${v}`).join("\n");
   const secretKey = crypto.createHmac("sha256", "WebAppData").update(BOT_TOKEN).digest();
   const calcHash = crypto.createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
   if (calcHash !== hash) return { ok: false, reason: "hash mismatch" };
-
   const userRaw = params.get("user");
   if (!userRaw) return { ok: false, reason: "no user" };
-
   try {
     const user = JSON.parse(userRaw);
     return { ok: true, user };
@@ -231,7 +204,6 @@ function verifyInitData(initData) {
     return { ok: false, reason: "bad user" };
   }
 }
-
 function internalAuth(req, res, next) {
   const token = req.get("x-internal-token") || req.query.token;
   if (!token || token !== INTERNAL_TOKEN) {
@@ -239,25 +211,20 @@ function internalAuth(req, res, next) {
   }
   next();
 }
-
 function verifyPostbackSecret(req, source = {}) {
   if (!POSTBACK_SECRET) return true;
   const secret = String(source.secret || req.get("x-postback-secret") || req.query.secret || "");
   return secret === POSTBACK_SECRET;
 }
-
 function isValidTelegramId(value) {
   return /^\d{5,20}$/.test(String(value || ""));
 }
-
 function t(lang, key) {
   const ru = {
     depositTitle: "<b>ШАГ 2 ИЗ 2</b>",
     depositText: `РЕГИСТРАЦИЯ ПОДТВЕРЖДЕНА.
-
 Теперь <b>ПОПОЛНИ</b> игровой счёт на минимальную сумму:
 <b>${MIN_DEPOSIT}</b>.
-
 После подтверждения депозита доступ к сигналам откроется <b>АВТОМАТИЧЕСКИ</b>.`,
     accessTitle: "<b>ДОСТУП АКТИВЕН</b>",
     accessText: `Ваш аккаунт <b>ПОДТВЕРЖДЁН</b>.
@@ -269,10 +236,8 @@ function t(lang, key) {
   const en = {
     depositTitle: "<b>STEP 2 OF 2</b>",
     depositText: `REGISTRATION CONFIRMED.
-
 Now <b>TOP UP</b> your gaming balance by the minimum amount:
 <b>${MIN_DEPOSIT}</b>.
-
 After the deposit is confirmed, access will be unlocked <b>AUTOMATICALLY</b>.`,
     accessTitle: "<b>ACCESS ACTIVE</b>",
     accessText: `Your account is <b>CONFIRMED</b>.
@@ -284,18 +249,14 @@ Open the app and get a signal for <b>MINES</b>.`,
   const dict = lang === "en" ? en : ru;
   return dict[key];
 }
-
 async function updateStoredMenu(u) {
   if (!u.menu_chat_id || !u.menu_message_id) return;
-
   let media;
   let caption;
   let reply_markup;
-
   if (u.paid && u.access) {
     media = `${BASE_URL}/bot/menu-access.png`;
     caption = `${t(u.lang, "accessTitle")}
-
 ${t(u.lang, "accessText")}`;
     reply_markup = {
       inline_keyboard: [
@@ -306,7 +267,6 @@ ${t(u.lang, "accessText")}`;
   } else if (u.reg) {
     media = `${BASE_URL}/bot/menu-step2.png`;
     caption = `${t(u.lang, "depositTitle")}
-
 ${t(u.lang, "depositText")}`;
     reply_markup = {
       inline_keyboard: [
@@ -317,7 +277,6 @@ ${t(u.lang, "depositText")}`;
   } else {
     return;
   }
-
   await tgCall("editMessageMedia", {
     chat_id: u.menu_chat_id,
     message_id: Number(u.menu_message_id),
@@ -330,36 +289,29 @@ ${t(u.lang, "depositText")}`;
     reply_markup
   });
 }
-
 const app = express();
 app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
-
 app.get("/", (req, res) => {
   return res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
 app.get("/healthz", (req, res) => {
   res.json({ ok: true });
 });
-
 app.get("/go", (req, res) => {
   const tg = String(req.query.tg || "");
   if (!isValidTelegramId(tg)) return res.status(400).send("bad tg");
   if (!ONEWIN_LINK) return res.status(500).send("onewin link is not configured");
-
   const target = buildOneWinUrl(ONEWIN_LINK, tg);
   console.log(`[GO] tg=${tg} keys=${ONEWIN_SUB_KEYS.join(",")} target=${target}`);
   return res.redirect(target);
 });
-
 async function handlePostback(req, res) {
   const source = {
     ...(req.query || {}),
     ...(req.body || {})
   };
-
   const event = normalizeEvent(source);
   const sub = extractTrackingId(source);
   const amount = numberFromAny([
@@ -369,44 +321,34 @@ async function handlePostback(req, res) {
     source.payout,
     source.deposit
   ]);
-
   console.log(`[PB] method=${req.method} event=${event || "-"} sub=${sub || "-"} amount=${amount} hasSecret=${Boolean(source.secret || req.get("x-postback-secret"))}`);
-
   if (!verifyPostbackSecret(req, source)) {
     return res.status(401).send("bad secret");
   }
-
   if (!["reg", "ftd"].includes(event)) {
     return res.status(400).send("bad event");
   }
-
   if (!isValidTelegramId(sub)) {
     return res.status(400).send("bad sub");
   }
-
   if (event === "ftd" && (!Number.isFinite(amount) || amount < 0)) {
     return res.status(400).send("bad amount");
   }
-
   await db.read();
   const u = getUser(sub);
   u.updatedAt = Date.now();
-
   if (source.user_id || source.uid || source.player_id) {
     u.user_id = String(source.user_id || source.uid || source.player_id);
   }
-
   if (event === "reg") {
     u.reg = true;
   }
-
   if (event === "ftd" && amount >= MIN_DEPOSIT_NUM) {
     u.reg = true;
     u.paid = true;
     if (!u.first_deposit_amount) {
       u.first_deposit_amount = amount;
     }
-
     if (!u.ref_rewarded && u.referrer_id) {
       const refUser = getUser(u.referrer_id);
       refUser.ref_earned = Number(refUser.ref_earned || 0) + REF_REWARD;
@@ -414,16 +356,12 @@ async function handlePostback(req, res) {
       u.ref_rewarded = true;
     }
   }
-
   computeAccess(u);
   await save();
   await updateStoredMenu(u);
-
   return res.send("ok");
 }
-
 app.all("/pb", handlePostback);
-
 app.get("/internal/user/:tgId", internalAuth, async (req, res) => {
   await db.read();
   const u = getUser(req.params.tgId);
@@ -431,12 +369,10 @@ app.get("/internal/user/:tgId", internalAuth, async (req, res) => {
   await save();
   res.json({ ok: true, user: u, min_deposit: MIN_DEPOSIT, ref_reward: REF_REWARD });
 });
-
 app.post("/internal/user/:tgId", internalAuth, async (req, res) => {
   await db.read();
   const u = getUser(req.params.tgId);
   const body = req.body || {};
-
   if (typeof body.lang === "string" && LANGS[body.lang]) u.lang = body.lang;
   if (typeof body.language_selected === "boolean") u.language_selected = body.language_selected;
   if (typeof body.subscribed === "boolean") u.subscribed = body.subscribed;
@@ -452,22 +388,18 @@ app.post("/internal/user/:tgId", internalAuth, async (req, res) => {
   computeAccess(u);
   u.updatedAt = Date.now();
   await save();
-
   res.json({ ok: true, user: u, min_deposit: MIN_DEPOSIT, ref_reward: REF_REWARD });
 });
-
 app.get("/internal/referrals/:tgId", internalAuth, async (req, res) => {
   await db.read();
   const tgId = String(req.params.tgId);
   getUser(tgId);
-
   const users = Object.values(db.data.users || {});
   const invited = users.filter((u) => String(u.referrer_id || "") === tgId);
   const registered = invited.filter((u) => !!u.reg).length;
   const withDeposit = invited.filter((u) => !!u.paid).length;
   const owner = getUser(tgId);
   const link = BOT_USERNAME ? `https://t.me/${BOT_USERNAME}?start=ref_${tgId}` : "";
-
   res.json({
     ok: true,
     stats: {
@@ -481,19 +413,15 @@ app.get("/internal/referrals/:tgId", internalAuth, async (req, res) => {
     }
   });
 });
-
 app.post("/api/me", async (req, res) => {
   const initData = req.body?.initData;
   if (!initData) return res.status(400).json({ ok: false, error: "no initData" });
-
   const v = verifyInitData(initData);
   if (!v.ok) return res.status(401).json({ ok: false, error: v.reason });
-
   await db.read();
   const u = getUser(String(v.user.id));
   computeAccess(u);
   await save();
-
   res.json({
     ok: true,
     tg_id: u.tg_id,
@@ -504,31 +432,25 @@ app.post("/api/me", async (req, res) => {
     min_deposit: MIN_DEPOSIT
   });
 });
-
 app.post("/api/signal", async (req, res) => {
   const { initData, mines, mode } = req.body || {};
   if (!initData) return res.status(400).json({ ok: false, error: "no initData" });
-
   const v = verifyInitData(initData);
   if (!v.ok) return res.status(401).json({ ok: false, error: v.reason });
-
   await db.read();
   const u = getUser(String(v.user.id));
   computeAccess(u);
   if (!u.access) {
     return res.status(403).json({ ok: false, error: "access denied" });
   }
-
   const m = Number(mines);
   const md = String(mode || "single");
   const allowedMines = new Set([1, 3, 5, 7]);
   if (!allowedMines.has(m)) return res.status(400).json({ ok: false, error: "bad mines" });
   if (!["single", "all"].includes(md)) return res.status(400).json({ ok: false, error: "bad mode" });
-
   const starsByMines = { 1: 7, 3: 5, 5: 4, 7: 3 };
   const stars = starsByMines[m];
   const all = Array.from({ length: 25 }, (_, i) => i);
-
   function pick(arr, n) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -537,11 +459,9 @@ app.post("/api/signal", async (req, res) => {
     }
     return a.slice(0, n);
   }
-
   let grid;
   let steps;
   let previewGrid;
-
   if (md === "all") {
     const trapPos = new Set(pick(all, m));
     grid = all.map((i) => (trapPos.has(i) ? 2 : 1));
@@ -554,10 +474,8 @@ app.post("/api/signal", async (req, res) => {
     steps = pick(starPos, starPos.length);
     previewGrid = Array.from({ length: 25 }, (_, i) => (starPos.includes(i) ? 1 : 0));
   }
-
   res.json({ ok: true, mines: m, stars, mode: md, grid, steps, previewGrid, ts: Date.now() });
 });
-
 app.listen(PORT, () => {
   console.log(`✅ Server on :${PORT}`);
   console.log(`🗄️ DB_PATH: ${DB_PATH}`);
