@@ -343,19 +343,21 @@ async function handlePostback(req, res) {
   if (event === "reg") {
     u.reg = true;
   }
-  if (event === "ftd" && amount >= MIN_DEPOSIT_NUM) {
-    u.reg = true;
-    u.paid = true;
-    if (!u.first_deposit_amount) {
-      u.first_deposit_amount = amount;
-    }
-    if (!u.ref_rewarded && u.referrer_id) {
-      const refUser = getUser(u.referrer_id);
-      refUser.ref_earned = Number(refUser.ref_earned || 0) + REF_REWARD;
-      refUser.updatedAt = Date.now();
-      u.ref_rewarded = true;
-    }
+  if (event === "ftd") {
+  u.reg = true;
+  u.paid = true;
+
+  if (!u.first_deposit_amount && amount > 0) {
+    u.first_deposit_amount = amount;
   }
+
+  if (!u.ref_rewarded && u.referrer_id) {
+    const refUser = getUser(u.referrer_id);
+    refUser.ref_earned = Number(refUser.ref_earned || 0) + REF_REWARD;
+    refUser.updatedAt = Date.now();
+    u.ref_rewarded = true;
+  }
+}
   computeAccess(u);
   await save();
   await updateStoredMenu(u);
