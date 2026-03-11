@@ -356,6 +356,9 @@ async function loadMe(){
   }
 
   meState = result.data;
+  if (meState?.lang && meState.lang !== currentLang) {
+    setLang(meState.lang);
+  }
   btnPlay.disabled = false;
   btnPlay.textContent = t("play");
 
