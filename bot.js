@@ -11,6 +11,8 @@ const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || "change-me";
 const CHANNEL_ID = process.env.CHANNEL_ID || "";
 const CHANNEL_URL = process.env.CHANNEL_URL || "";
 const BOT_USERNAME = (process.env.BOT_USERNAME || "").replace(/^@/, "");
+const ONEWIN_LINK = (process.env.ONEWIN_LINK || "").trim();
+const ONEWIN_SUB_KEY = (process.env.ONEWIN_SUB_KEY || "sub1").trim();
 
 if (!BOT_TOKEN) {
   console.log("❌ BOT_TOKEN не задан");
@@ -316,11 +318,23 @@ function mainKeyboard(user, lang) {
   };
 }
 
+function buildOneWinDirectUrl(chatId) {
+  if (!ONEWIN_LINK) return `${BASE_URL}/go?tg=${chatId}`;
+  try {
+    const url = new URL(ONEWIN_LINK);
+    url.searchParams.set(ONEWIN_SUB_KEY || "sub1", String(chatId));
+    return url.toString();
+  } catch {
+    const join = ONEWIN_LINK.includes("?") ? "&" : "?";
+    return `${ONEWIN_LINK}${join}${encodeURIComponent(ONEWIN_SUB_KEY || "sub1")}=${encodeURIComponent(String(chatId))}`;
+  }
+}
+
 function registrationKeyboard(chatId, lang) {
   const p = tr(lang);
   return {
     inline_keyboard: [
-      [{ text: p.registerBtn, url: `${BASE_URL}/go?tg=${chatId}` }],
+      [{ text: p.registerBtn, url: buildOneWinDirectUrl(chatId) }],
       [{ text: p.backBtn, callback_data: "main_menu" }]
     ]
   };
@@ -330,7 +344,7 @@ function depositKeyboard(chatId, lang) {
   const p = tr(lang);
   return {
     inline_keyboard: [
-      [{ text: p.depositBtn, url: `${BASE_URL}/go?tg=${chatId}` }],
+      [{ text: p.depositBtn, url: buildOneWinDirectUrl(chatId) }],
       [{ text: p.backBtn, callback_data: "main_menu" }]
     ]
   };
